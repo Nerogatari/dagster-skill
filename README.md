@@ -5,6 +5,8 @@ Dagster assets while keeping run-time behavior the same: which interval each run
 how data moves between steps, what happens after branches, and how failures are retried and
 alerted.
 
+Full guide (what the skill does, how to use it, how to evaluate it): [docs/GUIDE.md](docs/GUIDE.md).
+
 ## Layout
 
 | Path | Contents |
@@ -14,6 +16,7 @@ alerted.
 | `examples/` | Runnable Dagster code for each migration pattern |
 | `tests/` | pytest suite that pins each behavior the skill claims |
 | `evals/` | Prompt evals and trigger evals |
+| `docs/GUIDE.md` | Usage and evaluation guide |
 
 ## Install
 
