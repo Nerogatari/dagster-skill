@@ -1,0 +1,18 @@
+{
+  "skill": "airflow-to-dagster",
+  "test_cases": [
+    {"input": "Convert this Airflow DAG to Dagster", "should_trigger": true},
+    {"input": "Migrate my Airflow pipeline to Dagster assets", "should_trigger": true},
+    {"input": "How to rewrite Airflow @task as Dagster @asset", "should_trigger": true},
+    {"input": "Airflow XCom to Dagster", "should_trigger": true},
+    {"input": "What replaces {{ ds }} and catchup when we move to Dagster?", "should_trigger": true},
+    {"input": "Port our BranchPythonOperator logic over to dagster", "should_trigger": true},
+    {"input": "We're moving off Airflow onto Dagster, where do pools and SLAs go?", "should_trigger": true},
+    {"input": "What's the difference between Airflow and Dagster?", "should_trigger": false},
+    {"input": "Write a new Dagster asset from scratch", "should_trigger": false},
+    {"input": "Debug this Airflow DAG error", "should_trigger": false},
+    {"input": "Migrate our Prefect flows to Dagster", "should_trigger": false},
+    {"input": "Convert this Dagster job into an Airflow DAG", "should_trigger": false},
+    {"input": "Upgrade our DAGs from Airflow 2 to Airflow 3", "should_trigger": false}
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "skill": "airflow-to-dagster",
+  "test_cases": [
+    {
+      "name": "simple_taskflow_conversion",
+      "input": "Convert this Airflow DAG to Dagster: @task def extract(): return {'rows': 10}; @task def load(data): print(data); @dag(schedule='@daily', start_date=datetime(2024,1,1), catchup=False) def etl(): load(extract())",
+      "assertions": [
+        "Produces @dg.asset functions and a dg.Definitions that registers the assets, job and schedule",
+        "load receives extract's value through a function parameter (I/O manager), not deps with a placeholder",
+        "Contains no `...` placeholder in place of real logic",
+        "Includes the Airflow and Dagster Mermaid diagrams before the code",
+        "Includes an inventory table and the applicable checklist items"
+      ]
+    },
+    {
+      "name": "ds_templated_sql_partitions",
+      "input": "Port this DAG: schedule='@daily', start_date=pendulum.datetime(2024,1,1,tz='America/New_York'), catchup=True, one PostgresOperator with sql=\"DELETE FROM sales WHERE day='{{ ds }}'; INSERT INTO sales SELECT * FROM raw WHERE ts >= '{{ data_interval_start }}' AND ts < '{{ data_interval_end }}'\"",
+      "assertions": [
+        "Uses DailyPartitionsDefinition with timezone='America/New_York' and start_date 2024-01-01",
+        "Uses context.partition_key for ds and context.partition_time_window for the interval",
+        "Schedules with build_schedule_from_partitioned_job, not a plain cron that computes yesterday",
+        "States that catchup has no equivalent and gives a backfill command or UI path",
+        "Postgres connection becomes a ConfigurableResource fed by dg.EnvVar",
+        "Tests evaluate the schedule at a tick and assert the previous day's partition is requested"
+      ]
+    },
+    {
+      "name": "branch_and_join",
+      "input": "Migrate: choose = BranchPythonOperator(python_callable=lambda: 'full' if first_of_month() else 'incr'); choose >> [full, incr] >> report (report has trigger_rule='none_failed_min_one_success'). full and incr write different tables.",
+      "assertions": [
+        "Uses a multi_asset with optional outputs (is_required=False) for full and incr",
+        "Warns that an asset depending on both optional outputs is skipped",
+        "report depends on an always-produced output, not on both branch outputs"
+      ]
+    },
+    {
+      "name": "dynamic_mapping",
+      "input": "How do I convert process.expand(path=list_files()) to Dagster? Each file should be retryable on its own.",
+      "assertions": [
+        "Recommends DynamicPartitionsDefinition with a sensor that adds partitions and yields RunRequest(partition_key=...)",
+        "Sensor avoids re-adding existing partitions",
+        "Mentions DynamicOut / graph_asset as the in-run alternative",
+        "Does not produce Mermaid diagrams or the full checklist for this concept question"
+      ]
+    },
+    {
+      "name": "operational_settings",
+      "input": "Our default_args have retries=3, retry_exponential_backoff=True, pool='warehouse', execution_timeout=1h, on_failure_callback=slack_alert, sla=6h. What is the Dagster equivalent?",
+      "assertions": [
+        "RetryPolicy with backoff=dg.Backoff.EXPONENTIAL",
+        "pool= on the asset and the `dagster instance concurrency set` step",
+        "dagster/max_runtime run tag, noting that run monitoring must be enabled",
+        "run_failure_sensor for the callback",
+        "FreshnessPolicy.time_window for the SLA",
+        "Warns that retries require idempotent writes"
+      ]
+    },
+    {
+      "name": "connection_to_resource",
+      "input": "How do I convert an Airflow PostgresHook / Connection to Dagster?",
+      "assertions": [
+        "Recommends a dg.ConfigurableResource registered in Definitions",
+        "Shows injection via a function parameter",
+        "Uses dg.EnvVar for the credentials",
+        "Does not suggest keeping the Airflow Connection or BaseHook"
+      ]
+    },
+    {
+      "name": "sensor_migration",
+      "input": "Convert an ExternalTaskSensor that waits for our orders_etl DAG, which we are also migrating to Dagster.",
+      "assertions": [
+        "Replaces the sensor with an asset dependency on the migrated upstream asset",
+        "Uses AutomationCondition.eager() (or another automation condition) instead of polling",
+        "Mentions @dg.sensor only for upstreams that stay outside Dagster"
+      ]
+    }
+  ]
+}
